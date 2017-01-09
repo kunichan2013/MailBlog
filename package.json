@@ -1,0 +1,33 @@
+{
+  "name": "mailblog",
+  "version": "1.0.0",
+  "description": "Post to Pulse CMS by Mail",
+  "main": "main.js",
+  "dependencies": {
+    "async": "^2.1.4",
+    "asyncwait": "^1.0.2",
+    "iconv": "^2.2.1",
+    "inbox": "^1.1.59",
+    "mailparser": "^0.6.1",
+    "node-gyp": "^3.4.0",
+    "nodemailer": "^2.7.0",
+    "text-writer": "^0.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kunichan2013/MailBlog.git"
+  },
+  "keywords": [
+    "CMS"
+  ],
+  "author": "Kuniyoshi Tone",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kunichan2013/MailBlog/issues"
+  },
+  "homepage": "https://github.com/kunichan2013/MailBlog#readme"
+}

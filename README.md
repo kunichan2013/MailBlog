@@ -1,2 +1,35 @@
 # MailBlog
-Pulse CMS posting by email
+## Post Pulse CMS by Mail
+
+実行方法はmaintask-sample.ps1参照
+
+* 添付ファイルはmedia/attachedに保存される
+* ブログ本文にファイルへのリンクを表示
+
+To be done
+
+* 投稿メールの配信
+<pre>
+配信には自前のSMTPサーバーでなく
+https://github.com/nodemailer/nodemailer-wellknown#supported-services
+にあるWell-known Services のいずれかを使うこととする
+</pre>
+
+<注意>
+* iconv のインストールが必要だがWindowsの場合は事前に
+    * Python 2.7
+    * Visual C++
+    * Windows SDK 8.1
+
+が必要。
+
+後者２つについては
+* VS Community Edition 2015でこれらのオプションを有効化してインストール
+
+または
+
+* [Visual C++ Build Tools](http://go.microsoft.com/fwlink/?LinkId=691126)からダウンロードしてインストール
+
+しておくこと。
+
+またnode 7.2.1 以降 npm 4.0.5以降を使わないとコンパイルエラーが発生する可能性あり
