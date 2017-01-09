@@ -6,6 +6,7 @@
   "dependencies": {
     "async": "^2.1.4",
     "asyncwait": "^1.0.2",
+    "csv": "^1.1.0",
     "iconv": "^2.2.1",
     "inbox": "^1.1.59",
     "mailparser": "^0.6.1",

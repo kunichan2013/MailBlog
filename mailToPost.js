@@ -33,7 +33,7 @@ const lastTitleFile = G.lastTitleFile;
 
 
 /*
-Mail Subject に '[WA22-NNNNN]'が含まれるときコメントとみなす
+Mail Subject に '[PREFIX-NNNNN]'が含まれるときコメントとみなす
 
 コメントの場合
 ・bodyTemplateStrをメール本文、日付、投稿者で作成

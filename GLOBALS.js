@@ -29,3 +29,32 @@ exports.formatDate = function (date, format) {
     }
     return format;
 }
+
+
+// CSVのアドレスブックを読み込む処理
+
+var parse = require('csv-parse/lib/sync');
+
+var records = {};  // Parsed CSV array
+
+exports.getCSV = function (csvFileName) {
+    var csvData = fs.readFileSync(csvFileName, 'utf8');
+    records = parse(csvData, { columns: true });
+    // console.log(records);
+    return records;
+}
+
+exports.getPosterName = function (posterMail) {
+    var posterName = '';
+    records.some(function (addr) {
+        // console.log(posterMail);
+        if (addr.mail == posterMail) {
+            console.log(addr.mail + addr.name + ' OK');
+            posterName =  addr.name;
+            return true;
+        } else {
+            console.log(addr.mail + ' NG');
+        }
+    });
+    return posterName;
+}
