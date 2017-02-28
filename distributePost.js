@@ -5,13 +5,24 @@ var fs = require('fs');
 var mailer = require('nodemailer');
 
 // unreadCount Check
-const unreadCountFile = G.unreadCountFile;
-var unreadCountStr= fs.readFileSync(unreadCountFile, 'utf8'); // Read Unread Count
+var unreadCountStr= fs.readFileSync(G.unreadCountFile, 'utf8'); // Read Unread Count
 var unreadCount = Number(unreadCountStr);
 if (unreadCount <= 0) {return}  // End 
 
+// Mail Sender Name Check
+var mailSenderName = fs.readFileSync(G.mailSenderNameFile, 'utf8'); // Read blog post mail sender name
+if (mailSenderName == 'unknown') {
+    return;  // ToDo : 管理者に不正投稿通知
+}
 
-var smtpConfig = {
+// Get Mail Title
+var title = fs.readFileSync(G.lastTitleFile, 'utf8'); // Read lastTitleFile
+
+// Get Mail Body
+var body = fs.readFileSync(G.lastBodyFile, 'utf8'); // Read lastBodyFile
+
+
+var smtpConfig = {    // この部分全体をGLOBALS.jsに移動すべき
     service: G.smtpService,
     auth: {
         user: process.argv[2], // node実行時の第2パラメータ
@@ -19,7 +30,9 @@ var smtpConfig = {
     }
 };
 
+var csv =  process.argv[4];  // CSV file name
 
+var addrs = G.getCSV(csv);
 
 //メールの内容
 //  件名 lasttitle.txt
@@ -28,23 +41,26 @@ var smtpConfig = {
 var mailOptions = {
     from:  process.argv[2],
     to: 'kunitone.hub@gmail.com',
-    subject: '試験メール',
-    html: '<pre>こんにちは</pre>' //HTMLタグが使えます
+    subject: title,
+    html: body
 };
 
 //SMTPの接続
 var smtp = mailer.createTransport(smtpConfig);
 
-
-//メールの送信
-smtp.sendMail(mailOptions, function(err, res){
+addrs.forEach(function(addr) {
+  //メールの送信
+  mailOptions.to=addr.mail;
+  
+  smtp.sendMail(mailOptions, function(err, res) {
     //送信に失敗したとき
-    if(err){
-        console.log(err);
-    //送信に成功したとき
-    }else{
-        console.log('Message sent successfully.');
+    if (err) {
+      console.log(err);
+      //送信に成功したとき
+    } else {
+      // console.log("Message sent successfully. "+mailOptions.to);
     }
     //SMTPの切断
     smtp.close();
+  });
 });

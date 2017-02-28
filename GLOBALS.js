@@ -1,19 +1,22 @@
 exports.mailFile = 'mail.txt';
+exports.mailSenderNameFile = 'mailsender.txt';
 exports.unreadCountFile = 'unreadCount.data';
 exports.seqnoFile = 'seqno.data';
 
-exports.postFolder = 'blog\\';
-exports.attachedFolder =  'media\\attached\\';
+exports.postFolder = 'content\\post\\' ;
+exports.attachedFolder =  'static\\attached\\';
 
 exports.headerTemplateFile = 'headertemplate.html';
 exports.bodyTemplateFile = 'bodytemplate.html';
 exports.lastBodyFile = 'lastbody.txt';
 exports.lastTitleFile = 'lasttitle.txt';
+exports.postSuffix = '.md';
 
 exports.imapHost = 'imap.gmail.com';
 
 exports.smtpService = 'gmail';
 
+/* todo 170116 曜日表示を追加 formatにWを追加　*/
 exports.formatDate = function (date, format) {
     if (!format) format = 'YYYY-MM-DD hh:mm:ss.SSS';
     format = format.replace(/YYYY/g, date.getFullYear());
@@ -34,7 +37,7 @@ exports.formatDate = function (date, format) {
 // CSVのアドレスブックを読み込む処理
 
 var parse = require('csv-parse/lib/sync');
-
+var fs = require('fs');
 var records = {};  // Parsed CSV array
 
 exports.getCSV = function (csvFileName) {
@@ -45,15 +48,15 @@ exports.getCSV = function (csvFileName) {
 }
 
 exports.getPosterName = function (posterMail) {
-    var posterName = '';
+    var posterName = 'unknown';
     records.some(function (addr) {
         // console.log(posterMail);
         if (addr.mail == posterMail) {
-            console.log(addr.mail + addr.name + ' OK');
+            // console.log(addr.mail + addr.name + ' OK');
             posterName =  addr.name;
             return true;
         } else {
-            console.log(addr.mail + ' NG');
+            // console.log(addr.mail + ' NG');
         }
     });
     return posterName;

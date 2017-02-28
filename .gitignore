@@ -1,6 +1,8 @@
 /old/
 /NotUsed/
 /node_modules/
+/localtest/
+/.*/
 last*.txt
 mail.txt
 test*.js
