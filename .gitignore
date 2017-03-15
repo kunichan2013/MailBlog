@@ -7,3 +7,5 @@ last*.txt
 mail.txt
 test*.js
 *.data
+/Rubbish/
+desktop.ini

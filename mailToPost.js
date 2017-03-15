@@ -1,4 +1,4 @@
-/*　todo 170117 Postファイル名をYYMMnnnnn.txt とする*/
+/*　todo 170117 Postファイル名のパターンを可変に設定可能とし、YYMMnnnnn.txt などもできるようにする*/
 var G = require('./GLOBALS.js');
 var MailParser = require("mailparser").MailParser;
 var mailparser = new MailParser();
@@ -20,6 +20,8 @@ if (unreadCount <= 0) {
 
 const postFilePrefix = process.argv[4];  // post fileの名前のprefix
 const seqnoFile = G.seqnoFile;
+/*　todo 170302  seqnoFileがなければ00001で初期化 とする*/
+
 var postFileSeqNoStr = fs.readFileSync(seqnoFile, 'utf8'); // Read seqno.data
 
 const contentRoot = process.argv[2];
@@ -113,17 +115,20 @@ console.log('From mail :' + mailSender);
 
 
 
-// return-path があればそれを送信者アドレスとする
-if (typeof mail_object.headers['return-path'] !== 'undefined') {
-    if (typeof mail_object.headers['return-path'] == 'string') {
-        mailSender = mail_object.headers['return-path'];    // <Mail address in Return-Path Header>
-        mailSender = mailSender.replace(/</, '');
-        mailSender = mailSender.replace(/>/, '');
-    } else {
-        mailSender = mail_object.headers['return-path'][1]; // Mail address in Return-Path Header
-    }
-    console.log('Return Path = ' + mailSender);
+// return-pathを送信者アドレスとする。なければSPAMとみなす
+if (typeof mail_object.headers["return-path"] === "undefined") {
+    // 未登録者エラー
+} else {
+  if (typeof mail_object.headers["return-path"] == "string") {
+    mailSender = mail_object.headers["return-path"]; // <Mail address in Return-Path Header>
+    mailSender = mailSender.replace(/</, "");
+    mailSender = mailSender.replace(/>/, "");
+  } else {
+    mailSender = mail_object.headers["return-path"][1]; // Mail address in Return-Path Header
+  }
+  console.log("Return Path = " + mailSender);
 }
+
 
 var mailSenderName = G.getPosterName(mailSender);
 fs.writeFileSync(mailSenderNameFile, mailSenderName, 'utf-8');

@@ -33,6 +33,8 @@ var smtpConfig = {    // この部分全体をGLOBALS.jsに移動すべき
 var csv =  process.argv[4];  // CSV file name
 
 var addrs = G.getCSV(csv);
+var bccs  = G.numberOfBCC;
+var numberOfAddrs = addrs.length;
 
 //メールの内容
 //  件名 lasttitle.txt
@@ -40,13 +42,45 @@ var addrs = G.getCSV(csv);
 //  to: MLメンバー全員
 var mailOptions = {
     from:  process.argv[2],
-    to: 'kunitone.hub@gmail.com',
+    to: process.argv[2],
+    bcc: [],
     subject: title,
     html: body
 };
 
 //SMTPの接続
 var smtp = mailer.createTransport(smtpConfig);
+
+var j = 0;
+var bccArray = [];
+
+for (var i = 0; i < numberOfAddrs; i++) {
+  // console.log(addrs[i].mail);
+  bccArray[j] = addrs[i].mail;
+  j++;
+  if (j >= bccs || i >= (numberOfAddrs - 1)) {
+    console.log(bccArray);
+    mailOptions.bcc = bccArray;
+    bccArray = [];
+    j = 0;
+    smtp.sendMail(mailOptions, function(err, res) {
+      //送信に失敗したとき
+      if (err) {
+        console.log(err);
+        //送信に成功したとき
+      } else {
+        // console.log("Message sent successfully. "+mailOptions.to);
+      }
+      //SMTPの切断
+      smtp.close();
+    });
+  }
+}
+
+
+
+
+/*
 
 addrs.forEach(function(addr) {
   //メールの送信
@@ -64,3 +98,4 @@ addrs.forEach(function(addr) {
     smtp.close();
   });
 });
+*/

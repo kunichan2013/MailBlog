@@ -16,6 +16,8 @@ exports.imapHost = 'imap.gmail.com';
 
 exports.smtpService = 'gmail';
 
+exports.numberOfBCC = 10;
+
 /* todo 170116 曜日表示を追加 formatにWを追加　*/
 exports.formatDate = function (date, format) {
     if (!format) format = 'YYYY-MM-DD hh:mm:ss.SSS';
