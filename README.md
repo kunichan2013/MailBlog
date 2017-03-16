@@ -1,5 +1,6 @@
 # MailBlog
-## Post Pulse CMS by Mail
+## Post Contents to Static CMS  by Mail
+## Used to be for Pulse CMS, now for Hugo
 
 実行方法はmaintask-sample.ps1参照
 
