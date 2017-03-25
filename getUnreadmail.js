@@ -10,7 +10,7 @@ var MailParser = require("mailparser").MailParser;
 var mailparser = new MailParser();
 var fs = require('fs');
 
-var client = inbox.createConnection(false, 'imap.gmail.com', { // gmail接続
+var client = inbox.createConnection(false, G.imapHost, { // gmail接続
     secureConnection: true,
     auth: {
         user: process.argv[2], // node実行時の第2パラメータ

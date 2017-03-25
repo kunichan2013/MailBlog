@@ -7,19 +7,23 @@ exports.postFolder = 'content\\post\\' ;
 exports.attachedFolder =  'static\\attached\\';
 
 exports.headerTemplateFile = 'headertemplate.html';
-exports.bodyTemplateFile = 'bodytemplate.html';
+exports.bodyTemplateFile = 'localtest/bodytemplate.html'; // Usually you shoukd use 'bodytemplate.html'
 exports.lastBodyFile = 'lastbody.txt';
 exports.lastTitleFile = 'lasttitle.txt';
 exports.postSuffix = '.md';
 
 exports.imapHost = 'imap.gmail.com';
 
-exports.smtpService = 'gmail';
+const smtpService = 'gmail';
 
 exports.numberOfBCC = 10;
+exports.alertMailTitle = 'MailBlogからの警告';
+exports.alertMailText = '未登録のメール (##UNKNOWN##)からの投稿がありました';
+
 
 /* todo 170116 曜日表示を追加 formatにWを追加　*/
 exports.formatDate = function (date, format) {
+    let weekDayList = [ "日", "月", "火", "水", "木", "金", "土" ] ;
     if (!format) format = 'YYYY-MM-DD hh:mm:ss.SSS';
     format = format.replace(/YYYY/g, date.getFullYear());
     format = format.replace(/MM/g, ('0' + (date.getMonth() + 1)).slice(-2));
@@ -27,13 +31,24 @@ exports.formatDate = function (date, format) {
     format = format.replace(/hh/g, ('0' + date.getHours()).slice(-2));
     format = format.replace(/mm/g, ('0' + date.getMinutes()).slice(-2));
     format = format.replace(/ss/g, ('0' + date.getSeconds()).slice(-2));
+    format = format.replace(/W/g, weekDayList[ date.getDay() ] );	// 曜日
+
     if (format.match(/S/g)) {
         var milliSeconds = ('00' + date.getMilliseconds()).slice(-3);
         var length = format.match(/S/g).length;
         for (var i = 0; i < length; i++) format = format.replace(/S/, milliSeconds.substring(i, i + 1));
     }
     return format;
-}
+};
+
+//
+exports.smtpConfig = {
+    service: smtpService,
+    auth: {
+        user: process.argv[2], // node実行時の第1パラメータ
+        pass: process.argv[3]  //             第2パラメータ
+    }
+};
 
 
 // CSVのアドレスブックを読み込む処理
@@ -47,13 +62,13 @@ exports.getCSV = function (csvFileName) {
     records = parse(csvData, { columns: true });
     // console.log(records);
     return records;
-}
+};
 
 exports.getPosterName = function (posterMail) {
     var posterName = 'unknown';
     records.some(function (addr) {
         // console.log(posterMail);
-        if (addr.mail == posterMail) {
+        if (addr.mail === posterMail) {
             // console.log(addr.mail + addr.name + ' OK');
             posterName =  addr.name;
             return true;
@@ -62,4 +77,4 @@ exports.getPosterName = function (posterMail) {
         }
     });
     return posterName;
-}
+};

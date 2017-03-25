@@ -3,8 +3,16 @@ var G = require('./GLOBALS.js');
 var MailParser = require("mailparser").MailParser;
 var mailparser = new MailParser();
 var fs = require('fs');
+let mailer = require('nodemailer');
 
-var csv =  process.argv[5];  // CSV file name
+// Get argv
+const username =  process.argv[2];
+// const pw =  process.argv[3];
+const csv =  process.argv[4];  // CSV file name
+const adminMail =   process.argv[5];
+const contentRoot = process.argv[6];
+const attachedFileBaseURL = process.argv[7];
+const postFilePrefix = process.argv[8];  // post fileの名前のprefix
 
 var addrs = G.getCSV(csv);
 
@@ -18,16 +26,14 @@ if (unreadCount <= 0) {
     return
 }  // End
 
-const postFilePrefix = process.argv[4];  // post fileの名前のprefix
 const seqnoFile = G.seqnoFile;
 /*　todo 170302  seqnoFileがなければ00001で初期化 とする*/
 
 var postFileSeqNoStr = fs.readFileSync(seqnoFile, 'utf8'); // Read seqno.data
 
-const contentRoot = process.argv[2];
+
 const postFileFolderPath = contentRoot + G.postFolder;
 const attachedFileFolderPath = contentRoot + G.attachedFolder;
-const attachedFileBaseURL = process.argv[3];
 
 var postFileSeqNo = 0;  // 投稿ファイルのSeq No.
 var postFile = ' ';     // blog投稿ファイル名
@@ -52,12 +58,12 @@ const lastTitleFile = G.lastTitleFile;
  */
 function findPostFile(file) {
 
-    var regexp = new RegExp(file);
+    let regexp = new RegExp(file);
     console.log(regexp);
 
-    var list = fs.readdirSync(postFileFolderPath);
+    let list = fs.readdirSync(postFileFolderPath);
 
-    for (var i = 0; i < list.length; i++) {
+    for (let i = 0; i < list.length; i++) {
         // console.log(list[i]);
         if (regexp.test(list[i])) {
             console.log('***match***');
@@ -66,6 +72,30 @@ function findPostFile(file) {
         }
     }
     return false;
+}
+
+function unknownUser(mailAddr) {
+    let smtpConfig = G.smtpConfig;
+    let mailOptions = {
+        from:  username,
+        to: adminMail,
+        bcc: [],
+        subject: G.alertMailTitle,
+        html: G.alertMailText.replace('##UNKNOWN##',mailAddr)
+    };
+    //SMTPの接続
+    let smtp = mailer.createTransport(smtpConfig);
+    smtp.sendMail(mailOptions, function(err, res) {
+        //送信に失敗したとき
+        if (err) {
+            console.log(err);
+            //送信に成功したとき
+        } else {
+            // console.log("Message sent successfully. "+mailOptions.to);
+        }
+        //SMTPの切断
+        smtp.close();
+    });
 }
 
 
@@ -116,24 +146,28 @@ console.log('From mail :' + mailSender);
 
 
 // return-pathを送信者アドレスとする。なければSPAMとみなす
-if (typeof mail_object.headers["return-path"] === "undefined") {
+if (typeof mail_object.headers['return-path'] === 'undefined') {
     // 未登録者エラー
+    fs.writeFileSync(mailSenderNameFile, 'unknown', 'utf-8');
+    unknownUser(mailSender+' has no return-path');
+    return;
 } else {
-  if (typeof mail_object.headers["return-path"] == "string") {
-    mailSender = mail_object.headers["return-path"]; // <Mail address in Return-Path Header>
-    mailSender = mailSender.replace(/</, "");
-    mailSender = mailSender.replace(/>/, "");
+  if (typeof mail_object.headers['return-path'] === 'string') {
+    mailSender = mail_object.headers['return-path']; // <Mail address in Return-Path Header>
+    mailSender = mailSender.replace(/</, '');
+    mailSender = mailSender.replace(/>/, '');
   } else {
-    mailSender = mail_object.headers["return-path"][1]; // Mail address in Return-Path Header
+    mailSender = mail_object.headers['return-path'][1]; // Mail address in Return-Path Header
   }
-  console.log("Return Path = " + mailSender);
+  console.log('Return Path = ' + mailSender);
 }
 
 
 var mailSenderName = G.getPosterName(mailSender);
 fs.writeFileSync(mailSenderNameFile, mailSenderName, 'utf-8');
-if (mailSenderName == 'unknown') {
-    console.log('Unknown Sender: '+mailSender)
+if (mailSenderName == 'unknown') {     // 未登録者エラー
+    console.log('Unknown Sender: '+mailSender);
+    unknownUser(mailSender);
     return;
 }
 
@@ -145,8 +179,7 @@ var postDate = new Date(mail_object.headers.date);
 headerTemplateStr = headerTemplateStr.replace(/#date#/, G.formatDate(postDate, 'MM-DD-YYYY')); // for meta data
 headerTemplateStr = headerTemplateStr.replace(/#datetime#/, G.formatDate(postDate, 'YYYY-MM-DD hh:mm:ss')); // for meta data
 
-
-bodyTemplateStr = bodyTemplateStr.replace(/#datetime#/, G.formatDate(postDate, 'YYYY/MM/DD hh:mm:ss')); // for display
+bodyTemplateStr = bodyTemplateStr.replace(/#datetime#/, G.formatDate(postDate, 'YYYY/MM/DD(W) hh:mm:ss')); // for display
 bodyTemplateStr = bodyTemplateStr.replace(/#from#/, mailSenderName);
 
 if (typeof mail_object.html === 'undefined') {  // HTMLオブジェクトが未定義ならば

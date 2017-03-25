@@ -4,7 +4,7 @@
 /localtest/
 /.*/
 last*.txt
-mail.txt
+mail*.txt
 test*.js
 *.data
 /Rubbish/

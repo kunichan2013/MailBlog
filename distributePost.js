@@ -12,7 +12,7 @@ if (unreadCount <= 0) {return}  // End
 // Mail Sender Name Check
 var mailSenderName = fs.readFileSync(G.mailSenderNameFile, 'utf8'); // Read blog post mail sender name
 if (mailSenderName == 'unknown') {
-    return;  // ToDo : 管理者に不正投稿通知
+    return;  // Nothing to do
 }
 
 // Get Mail Title
@@ -22,13 +22,8 @@ var title = fs.readFileSync(G.lastTitleFile, 'utf8'); // Read lastTitleFile
 var body = fs.readFileSync(G.lastBodyFile, 'utf8'); // Read lastBodyFile
 
 
-var smtpConfig = {    // この部分全体をGLOBALS.jsに移動すべき
-    service: G.smtpService,
-    auth: {
-        user: process.argv[2], // node実行時の第2パラメータ
-        pass: process.argv[3]  // 第3パラメータ
-    }
-};
+let smtpConfig = G.smtpConfig;
+
 
 var csv =  process.argv[4];  // CSV file name
 
@@ -42,7 +37,7 @@ var numberOfAddrs = addrs.length;
 //  to: MLメンバー全員
 var mailOptions = {
     from:  process.argv[2],
-    to: process.argv[2],
+    to: process.argv[5],  // send to archive address
     bcc: [],
     subject: title,
     html: body
