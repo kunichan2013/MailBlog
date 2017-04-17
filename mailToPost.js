@@ -39,8 +39,8 @@ var postFileSeqNo = 0;  // 投稿ファイルのSeq No.
 var postFile = ' ';     // blog投稿ファイル名
 var isComment = false;  // メールのsubjectでコメントかどうかを判断した結果
 
-// const templateFile = G.templateFile;
-const headerTemplateFile = G.headerTemplateFile;
+const postHeaderTemplateFile = G.postHeaderTemplateFile;
+const mailHeaderTemplateFile = G.mailHeaderTemplateFile;
 const bodyTemplateFile = G.bodyTemplateFile;
 const lastBodyFile = G.lastBodyFile;
 const lastTitleFile = G.lastTitleFile;
@@ -122,7 +122,8 @@ function getPostFile(subject) {
 }
 
 
-var headerTemplateStr = fs.readFileSync(headerTemplateFile, 'utf8'); // Read Blog Header Template File
+var postHeaderTemplateStr = fs.readFileSync(postHeaderTemplateFile, 'utf8'); // Read Blog Header Template File
+var mailHeaderTemplateStr = fs.readFileSync(mailHeaderTemplateFile, 'utf8'); // Read Mail Header Template File
 var bodyTemplateStr = fs.readFileSync(bodyTemplateFile, 'utf8');   // Read Blog Body Template File
 
 var templateLinkLine = ' <br><a href="#url#" target="_blank">・#file#</a>';
@@ -173,17 +174,18 @@ if (mailSenderName == 'unknown') {     // 未登録者エラー
 
 console.log("日付:", mail_object.date.toLocaleString());
 
-headerTemplateStr = headerTemplateStr.replace(/#title#/, mail_object.subject);
+postHeaderTemplateStr = postHeaderTemplateStr.replace(/#title#/, mail_object.subject);
+mailHeaderTemplateStr = mailHeaderTemplateStr.replace(/#title#/, mail_object.subject);
 
 var postDate = new Date(mail_object.headers.date);
-headerTemplateStr = headerTemplateStr.replace(/#date#/, G.formatDate(postDate, 'MM-DD-YYYY')); // for meta data
-headerTemplateStr = headerTemplateStr.replace(/#datetime#/, G.formatDate(postDate, 'YYYY-MM-DD hh:mm:ss')); // for meta data
+postHeaderTemplateStr = postHeaderTemplateStr.replace(/#date#/, G.formatDate(postDate, 'MM-DD-YYYY')); // for meta data
+postHeaderTemplateStr = postHeaderTemplateStr.replace(/#datetime#/, G.formatDate(postDate, 'YYYY-MM-DD hh:mm:ss')); // for meta data
 
 bodyTemplateStr = bodyTemplateStr.replace(/#datetime#/, G.formatDate(postDate, 'YYYY/MM/DD(W) hh:mm:ss')); // for display
 bodyTemplateStr = bodyTemplateStr.replace(/#from#/, mailSenderName);
 
 if (typeof mail_object.html === 'undefined') {  // HTMLオブジェクトが未定義ならば
-    bodyTemplateStr = bodyTemplateStr.replace(/#body#/, '<pre>' + mail_object.text + '</pre>');
+    bodyTemplateStr = bodyTemplateStr.replace(/#body#/, mail_object.text.replace(/\r?\n/g, "<br />") );
 } else {
     bodyTemplateStr = bodyTemplateStr.replace(/#body#/, mail_object.html);
 }
@@ -216,10 +218,10 @@ if (isComment) {
 } else {
     var lastTitle = '[' + postFilePrefix + postFileSeqNoStr + ']' + subject;
     postFile = postFile + G.formatDate(postDate, '-YYYYMMDD-hhmmss') + G.postSuffix;
-    fs.writeFileSync(postFile, headerTemplateStr + bodyTemplateStr);
+    fs.writeFileSync(postFile, postHeaderTemplateStr + bodyTemplateStr);
 }
 
-fs.writeFileSync(lastBodyFile, bodyTemplateStr);
+fs.writeFileSync(lastBodyFile, mailHeaderTemplateStr + bodyTemplateStr);
 fs.writeFileSync(lastTitleFile, lastTitle);
 
 })

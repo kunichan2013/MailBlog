@@ -6,8 +6,11 @@ exports.seqnoFile = 'seqno.data';
 exports.postFolder = 'content\\post\\' ;
 exports.attachedFolder =  'static\\attached\\';
 
-exports.headerTemplateFile = 'headertemplate.html';
-exports.bodyTemplateFile = 'localtest/bodytemplate.html'; // Usually you shoukd use 'bodytemplate.html'
+exports.postHeaderTemplateFile = 'templates/post-headertemplate.html';
+// exports.mailHeaderTemplateFile = 'templates/mail-headertemplate.html';
+exports.mailHeaderTemplateFile = 'templates/secret-mail-headertemplate.html'; // If you send secret info use this
+exports.bodyTemplateFile = 'templates/bodytemplate.html';
+
 exports.lastBodyFile = 'lastbody.txt';
 exports.lastTitleFile = 'lasttitle.txt';
 exports.postSuffix = '.md';
@@ -16,7 +19,7 @@ exports.imapHost = 'imap.gmail.com';
 
 const smtpService = 'gmail';
 
-exports.numberOfBCC = 10;
+exports.numberOfBCC = 30;  // 一度に送るBCC宛先数
 exports.alertMailTitle = 'MailBlogからの警告';
 exports.alertMailText = '未登録のメール (##UNKNOWN##)からの投稿がありました';
 
