@@ -23,6 +23,7 @@ exports.numberOfBCC = 30;  // 一度に送るBCC宛先数
 exports.alertMailTitle = 'MailBlogからの警告';
 exports.alertMailText = '未登録のメール (##UNKNOWN##)からの投稿がありました';
 
+exports.mailHTML = './localtest/mail';  // for debug
 
 /* todo 170116 曜日表示を追加 formatにWを追加　*/
 exports.formatDate = function (date, format) {

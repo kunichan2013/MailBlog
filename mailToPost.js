@@ -184,10 +184,16 @@ postHeaderTemplateStr = postHeaderTemplateStr.replace(/#datetime#/, G.formatDate
 bodyTemplateStr = bodyTemplateStr.replace(/#datetime#/, G.formatDate(postDate, 'YYYY/MM/DD(W) hh:mm:ss')); // for display
 bodyTemplateStr = bodyTemplateStr.replace(/#from#/, mailSenderName);
 
+let timestamp= new Date();
+let ts_string = G.formatDate(timestamp,'YYYYMMDD-hhmmss');
+
+
 if (typeof mail_object.html === 'undefined') {  // HTMLオブジェクトが未定義ならば
     bodyTemplateStr = bodyTemplateStr.replace(/#body#/, mail_object.text.replace(/\r?\n/g, "<br />") );
+    fs.writeFileSync(G.mailHTML+ts_string+'.txt', mail_object.text);
 } else {
     bodyTemplateStr = bodyTemplateStr.replace(/#body#/, mail_object.html);
+    fs.writeFileSync(G.mailHTML+ts_string+'.html', mail_object.html);
 }
 
 if (typeof mail_object.attachments === 'undefined') {  // attachmentsが未定義ならば
