@@ -190,11 +190,12 @@ let ts_string = G.formatDate(timestamp,'YYYYMMDD-hhmmss');
 
 if (typeof mail_object.html === 'undefined') {  // HTMLオブジェクトが未定義ならば
     bodyTemplateStr = bodyTemplateStr.replace(/#body#/, mail_object.text.replace(/\r?\n/g, "<br />") );
-    fs.writeFileSync(G.mailHTML+ts_string+'.txt', mail_object.text);
 } else {
     bodyTemplateStr = bodyTemplateStr.replace(/#body#/, mail_object.html);
-    fs.writeFileSync(G.mailHTML+ts_string+'.html', mail_object.html);
 }
+
+fs.writeFileSync(G.mailHTML+ts_string+'.html', mail_object.html); // Put HTML source
+fs.writeFileSync(G.mailHTML+ts_string+'.txt', mail_object.text);  // Put TXT source
 
 if (typeof mail_object.attachments === 'undefined') {  // attachmentsが未定義ならば
     bodyTemplateStr = bodyTemplateStr.replace(/##attached file list##/, ' '); // 添付ファイルがなければ見出しなし
