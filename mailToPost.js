@@ -191,7 +191,10 @@ let ts_string = G.formatDate(timestamp,'YYYYMMDD-hhmmss');
 if (typeof mail_object.html === 'undefined') {  // HTMLオブジェクトが未定義ならば
     bodyTemplateStr = bodyTemplateStr.replace(/#body#/, mail_object.text.replace(/\r?\n/g, "<br />") );
 } else {
-    bodyTemplateStr = bodyTemplateStr.replace(/#body#/, mail_object.html);
+    let HTMLwork = mail_object.html;
+    HTMLwork = HTMLwork.replace(/<o:p>/g,"");  // Remove OUTLOOK specific <o> tag\
+    HTMLwork = HTMLwork.replace(/<\/o:p>/g,"");
+    bodyTemplateStr = bodyTemplateStr.replace(/#body#/, HTMLwork);
 }
 
 fs.writeFileSync(G.mailHTML+ts_string+'.html', mail_object.html); // Put HTML source
