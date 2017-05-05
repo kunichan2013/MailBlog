@@ -249,7 +249,7 @@ mailparser.on("end", (mail_object) => {  // Mail Parse End  Block
 
     if (isComment) {
         var lastTitle = subject;
-        var commentStart = '\n \n ====コメント (' + lastTitle + ')====\n';
+        var commentStart = '<br><br> ====コメント (' + lastTitle + ')====<br>';
         bodyTemplateStr = bodyTemplateStr.replace(/#body#/,bodySimpleText);
         fs.appendFileSync(postFile, commentStart + bodyTemplateStr);
     } else {
