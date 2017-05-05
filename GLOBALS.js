@@ -25,7 +25,9 @@ exports.alertMailText = '未登録のメール (##UNKNOWN##)からの投稿が�
 
 exports.mailHTML = './localtest/mail';  // for debug
 
-/* todo 170116 曜日表示を追加 formatにWを追加　*/
+exports.quoteId = '_以下の投稿がありました。';
+exports.quoteRemoved = '＜以下の引用を省略＞ <br>';
+
 exports.formatDate = function (date, format) {
     let weekDayList = [ "日", "月", "火", "水", "木", "金", "土" ] ;
     if (!format) format = 'YYYY-MM-DD hh:mm:ss.SSS';

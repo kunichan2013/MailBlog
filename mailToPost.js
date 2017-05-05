@@ -6,10 +6,10 @@ var fs = require('fs');
 let mailer = require('nodemailer');
 
 // Get argv
-const username =  process.argv[2];
+const username = process.argv[2];
 // const pw =  process.argv[3];
-const csv =  process.argv[4];  // CSV file name
-const adminMail =   process.argv[5];
+const csv = process.argv[4];  // CSV file name
+const adminMail = process.argv[5];
 const contentRoot = process.argv[6];
 const attachedFileBaseURL = process.argv[7];
 const postFilePrefix = process.argv[8];  // post fileの名前のprefix
@@ -77,15 +77,15 @@ function findPostFile(file) {
 function unknownUser(mailAddr) {
     let smtpConfig = G.smtpConfig;
     let mailOptions = {
-        from:  username,
+        from: username,
         to: adminMail,
         bcc: [],
         subject: G.alertMailTitle,
-        html: G.alertMailText.replace('##UNKNOWN##',mailAddr)
+        html: G.alertMailText.replace('##UNKNOWN##', mailAddr)
     };
     //SMTPの接続
     let smtp = mailer.createTransport(smtpConfig);
-    smtp.sendMail(mailOptions, function(err, res) {
+    smtp.sendMail(mailOptions, function (err, res) {
         //送信に失敗したとき
         if (err) {
             console.log(err);
@@ -121,6 +121,18 @@ function getPostFile(subject) {
 
 }
 
+function removeExtraQuatation(strWithQ) {  // 投稿から過去メールの引用を削除する
+    // console.log(strWithQ);
+    let delmitterForQ = G.quoteId;
+    let textArray = strWithQ.split(delmitterForQ);
+    console.log(textArray[0]);
+    if (textArray.length > 1) {
+        return textArray[0] + G.quoteRemoved;
+    } else {
+        return strWithQ;
+    }
+
+}
 
 var postHeaderTemplateStr = fs.readFileSync(postHeaderTemplateFile, 'utf8'); // Read Blog Header Template File
 var mailHeaderTemplateStr = fs.readFileSync(mailHeaderTemplateFile, 'utf8'); // Read Mail Header Template File
@@ -132,107 +144,123 @@ fs.createReadStream(mailFile).pipe(mailparser);
 
 mailparser.on("end", (mail_object) => {  // Mail Parse End  Block
 
-console.log("Subject:", mail_object.subject);
-var subject = mail_object.subject;
-getPostFile(subject); // subjectからコメントの判定とpostファイル名を決定
+    console.log("Subject:", mail_object.subject);
+    var subject = mail_object.subject;
+    getPostFile(subject); // subjectからコメントの判定とpostファイル名を決定
 
-console.log("Date:", mail_object.headers.date);
+    console.log("Date:", mail_object.headers.date);
 // console.log("From:", mail_object.headers.from);
 // console.log("headers:", mail_object.headers);
 
-var mailSender = mail_object.headers.from;
+    var mailSender = mail_object.headers.from;
 
-console.log('From mail :' + mailSender);
-
+    console.log('From mail :' + mailSender);
 
 
 // return-pathを送信者アドレスとする。なければSPAMとみなす
-if (typeof mail_object.headers['return-path'] === 'undefined') {
-    // 未登録者エラー
-    fs.writeFileSync(mailSenderNameFile, 'unknown', 'utf-8');
-    unknownUser(mailSender+' has no return-path');
-    return;
-} else {
-  if (typeof mail_object.headers['return-path'] === 'string') {
-    mailSender = mail_object.headers['return-path']; // <Mail address in Return-Path Header>
-    mailSender = mailSender.replace(/</, '');
-    mailSender = mailSender.replace(/>/, '');
-  } else {
-    mailSender = mail_object.headers['return-path'][1]; // Mail address in Return-Path Header
-  }
-  console.log('Return Path = ' + mailSender);
-}
+    if (typeof mail_object.headers['return-path'] === 'undefined') {
+        // 未登録者エラー
+        fs.writeFileSync(mailSenderNameFile, 'unknown', 'utf-8');
+        unknownUser(mailSender + ' has no return-path');
+        return;
+    } else {
+        if (typeof mail_object.headers['return-path'] === 'string') {
+            mailSender = mail_object.headers['return-path']; // <Mail address in Return-Path Header>
+            mailSender = mailSender.replace(/</, '');
+            mailSender = mailSender.replace(/>/, '');
+        } else {
+            mailSender = mail_object.headers['return-path'][1]; // Mail address in Return-Path Header
+        }
+        console.log('Return Path = ' + mailSender);
+    }
 
 
-var mailSenderName = G.getPosterName(mailSender);
-fs.writeFileSync(mailSenderNameFile, mailSenderName, 'utf-8');
-if (mailSenderName == 'unknown') {     // 未登録者エラー
-    console.log('Unknown Sender: '+mailSender);
-    unknownUser(mailSender);
-    return;
-}
+    var mailSenderName = G.getPosterName(mailSender);
+    fs.writeFileSync(mailSenderNameFile, mailSenderName, 'utf-8');
+    if (mailSenderName == 'unknown') {     // 未登録者エラー
+        console.log('Unknown Sender: ' + mailSender);
+        unknownUser(mailSender);
+        return;
+    }
 
-console.log("日付:", mail_object.date.toLocaleString());
+    console.log("日付:", mail_object.date.toLocaleString());
 
-postHeaderTemplateStr = postHeaderTemplateStr.replace(/#title#/, mail_object.subject);
-mailHeaderTemplateStr = mailHeaderTemplateStr.replace(/#title#/, mail_object.subject);
+    postHeaderTemplateStr = postHeaderTemplateStr.replace(/#title#/, mail_object.subject);
+    mailHeaderTemplateStr = mailHeaderTemplateStr.replace(/#title#/, mail_object.subject);
 
-var postDate = new Date(mail_object.headers.date);
-postHeaderTemplateStr = postHeaderTemplateStr.replace(/#date#/, G.formatDate(postDate, 'MM-DD-YYYY')); // for meta data
-postHeaderTemplateStr = postHeaderTemplateStr.replace(/#datetime#/, G.formatDate(postDate, 'YYYY-MM-DD hh:mm:ss')); // for meta data
+    var postDate = new Date(mail_object.headers.date);
+    postHeaderTemplateStr = postHeaderTemplateStr.replace(/#date#/, G.formatDate(postDate, 'MM-DD-YYYY')); // for meta data
+    postHeaderTemplateStr = postHeaderTemplateStr.replace(/#datetime#/, G.formatDate(postDate, 'YYYY-MM-DD hh:mm:ss')); // for meta data
 
-bodyTemplateStr = bodyTemplateStr.replace(/#datetime#/, G.formatDate(postDate, 'YYYY/MM/DD(W) hh:mm:ss')); // for display
-bodyTemplateStr = bodyTemplateStr.replace(/#from#/, mailSenderName);
+    bodyTemplateStr = bodyTemplateStr.replace(/#datetime#/, G.formatDate(postDate, 'YYYY/MM/DD(W) hh:mm:ss')); // for display
+    bodyTemplateStr = bodyTemplateStr.replace(/#from#/, mailSenderName);
 
-let timestamp= new Date();
-let ts_string = G.formatDate(timestamp,'YYYYMMDD-hhmmss');
+    let timestamp = new Date();
+    let ts_string = G.formatDate(timestamp, 'YYYYMMDD-hhmmss');
+    fs.writeFileSync(G.mailHTML + ts_string + '.html', mail_object.html); // Put HTML source for Debug
+    fs.writeFileSync(G.mailHTML + ts_string + '.txt', mail_object.text);  // Put TXT source
+
+    let bodySimpleText = mail_object.text.replace(/\r?\n/g, '<br />\r\n');
+
+    // ###DEBUG
+    // bodySimpleText = fs.readFileSync('../MailBlogTest/localtest/mail20170502-143021.txt', 'utf8'); // Read Blog Header Template File
+    // bodySimpleText = fs.readFileSync('../MailBlogTest/localtest/mail20170502-124510.txt', 'utf8'); // Read Blog Header Template File
+    //
+    // bodySimpleText = bodySimpleText.replace(/\r?\n/g, '<br />\r\n');
+    // bodySimpleText = bodyTemplateStr.replace(/#body#/, bodySimpleText);
+    // ## DEBUG
+
+    bodySimpleText = removeExtraQuatation(bodySimpleText);
+
+    let bodyText = '';
+
+    if (typeof mail_object.html === 'undefined') {  // HTMLオブジェクトが未定義ならば
+        bodyText  =  bodySimpleText;
+    } else {
+        let bodyHTMLText = mail_object.html;
+        bodyHTMLText = bodyHTMLText.replace(/<o:p>/g, "");  // Remove OUTLOOK specific <o> tags
+        bodyHTMLText = bodyHTMLText.replace(/<\/o:p>/g, "");
+        bodyText = bodyHTMLText;
+    }
 
 
-if (typeof mail_object.html === 'undefined') {  // HTMLオブジェクトが未定義ならば
-    bodyTemplateStr = bodyTemplateStr.replace(/#body#/, mail_object.text.replace(/\r?\n/g, "<br />") );
-} else {
-    let HTMLwork = mail_object.html;
-    HTMLwork = HTMLwork.replace(/<o:p>/g,"");  // Remove OUTLOOK specific <o> tag\
-    HTMLwork = HTMLwork.replace(/<\/o:p>/g,"");
-    bodyTemplateStr = bodyTemplateStr.replace(/#body#/, HTMLwork);
-}
+    let attachedFileLink = '';
 
-fs.writeFileSync(G.mailHTML+ts_string+'.html', mail_object.html); // Put HTML source
-fs.writeFileSync(G.mailHTML+ts_string+'.txt', mail_object.text);  // Put TXT source
-
-if (typeof mail_object.attachments === 'undefined') {  // attachmentsが未定義ならば
-    bodyTemplateStr = bodyTemplateStr.replace(/##attached file list##/, ' '); // 添付ファイルがなければ見出しなし
-} else {
-    mail_object.attachments.forEach(function (attachment) {
-        bodyTemplateStr = bodyTemplateStr.replace(/##attached file list##/, '**添付ファイルの一覧(クリックするとダウンロードまたは表示)**'); // 添付ファイル見出し
-        var fileName = attachment.generatedFileName;
-        // console.log(fileName);
-        var savedFileName = G.formatDate(postDate, 'YYYYMMDD-hhmmss-') + fileName;
-        var attachedFile = attachedFileFolderPath + savedFileName;
-        fs.writeFileSync(attachedFile, attachment.content);
-        var attachedFileLink = templateLinkLine;
-        attachedFileLink = attachedFileLink.replace('#file#', fileName);
-        attachedFileLink = attachedFileLink.replace('#url#', attachedFileBaseURL + savedFileName);
-        console.log(attachedFileLink);
-        bodyTemplateStr = bodyTemplateStr + attachedFileLink;
-    });
-}
+    if (typeof mail_object.attachments === 'undefined') {  // attachmentsが未定義ならば
+            bodyTemplateStr = bodyTemplateStr.replace(/##attached file list##/, ' '); // 添付ファイルがなければ見出しなし
+    } else {
+        mail_object.attachments.forEach(function (attachment) {
+            bodyTemplateStr = bodyTemplateStr.replace(/##attached file list##/, '**添付ファイルの一覧(クリックするとダウンロードまたは表示)**'); // 添付ファイル見出し
+            var fileName = attachment.generatedFileName;
+            // console.log(fileName);
+            var savedFileName = G.formatDate(postDate, 'YYYYMMDD-hhmmss-') + fileName;
+            var attachedFile = attachedFileFolderPath + savedFileName;
+            fs.writeFileSync(attachedFile, attachment.content);
+            attachedFileLink = templateLinkLine;
+            attachedFileLink = attachedFileLink.replace('#file#', fileName);
+            attachedFileLink = attachedFileLink.replace('#url#', attachedFileBaseURL + savedFileName);
+            console.log(attachedFileLink);
+            bodyTemplateStr = bodyTemplateStr + attachedFileLink;
+        });
+    }
 
 // postFile = postFileFolderPath + postFilePrefix + postFileSeqNoStr + G.formatDate(postDate, '-YYYYMMDD-hhmmss') + '.txt';
 // console.log(postFile);
 
-if (isComment) {
-    var lastTitle = subject;
-    var commentStart = '\n \n ====コメント (' + lastTitle + ')====\n';
-    fs.appendFileSync(postFile, commentStart + bodyTemplateStr);
-} else {
-    var lastTitle = '[' + postFilePrefix + postFileSeqNoStr + ']' + subject;
-    postFile = postFile + G.formatDate(postDate, '-YYYYMMDD-hhmmss') + G.postSuffix;
-    fs.writeFileSync(postFile, postHeaderTemplateStr + bodyTemplateStr);
-}
+    if (isComment) {
+        var lastTitle = subject;
+        var commentStart = '\n \n ====コメント (' + lastTitle + ')====\n';
+        bodyTemplateStr = bodyTemplateStr.replace(/#body#/,bodySimpleText);
+        fs.appendFileSync(postFile, commentStart + bodyTemplateStr);
+    } else {
+        var lastTitle = '[' + postFilePrefix + postFileSeqNoStr + ']' + subject;
+        postFile = postFile + G.formatDate(postDate, '-YYYYMMDD-hhmmss') + G.postSuffix;
+        bodyTemplateStr = bodyTemplateStr.replace(/#body#/,bodyText);
+        fs.writeFileSync(postFile, postHeaderTemplateStr + bodyTemplateStr);
+    }
 
-fs.writeFileSync(lastBodyFile, mailHeaderTemplateStr + bodyTemplateStr);
-fs.writeFileSync(lastTitleFile, lastTitle);
+    fs.writeFileSync(lastBodyFile, mailHeaderTemplateStr + bodyTemplateStr);
+    fs.writeFileSync(lastTitleFile, lastTitle);
 
 })
 ;
