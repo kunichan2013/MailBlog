@@ -165,12 +165,12 @@ mailparser.on("end", (mail_object) => {  // Mail Parse End  Block
         return;
     } else {
         if (typeof mail_object.headers['return-path'] === 'string') {
-            mailSender = mail_object.headers['return-path']; // <Mail address in Return-Path Header>
-            mailSender = mailSender.replace(/</, '');
-            mailSender = mailSender.replace(/>/, '');
+            mailSender = mail_object.headers['return-path'];
         } else {
-            mailSender = mail_object.headers['return-path'][1]; // Mail address in Return-Path Header
+            mailSender = mail_object.headers['return-path'][1];
         }
+        mailSender = mailSender.replace(/</, '');
+        mailSender = mailSender.replace(/>/, ''); // remove <>
         console.log('Return Path = ' + mailSender);
     }
 
