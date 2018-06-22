@@ -74,7 +74,7 @@ exports.getPosterName = function (posterMail) {
     var posterName = 'unknown';
     records.some(function (addr) {
         // console.log(posterMail);
-        if (addr.mail === posterMail) {
+        if (addr.mail.toLowerCase() === posterMail.toLowerCase() ) { // メールアドレスの比較はcase-insensitive 2018.06.22 
             // console.log(addr.mail + addr.name + ' OK');
             posterName =  addr.name;
             return true;
