@@ -1,4 +1,6 @@
 /*　todo 170117 Postファイル名のパターンを可変に設定可能とし、YYMMnnnnn.txt などもできるようにする*/
+/*　fix  180707 件名がundfinedの新規投稿がエラー => その場合は件名を「From 投稿者名」とする*/
+
 var G = require('./GLOBALS.js');
 var MailParser = require("mailparser").MailParser;
 var mailparser = new MailParser();
@@ -145,6 +147,7 @@ mailparser.on("end", (mail_object) => { // Mail Parse End  Block
 
     console.log("Subject:", mail_object.subject);
     var subject = mail_object.subject;
+    if (subject === undefined) { subject = " " };                           //180707 For missing mail subject
     getPostFile(subject); // subjectからコメントの判定とpostファイル名を決定
 
     console.log("Date:", mail_object.headers.date);
@@ -181,6 +184,8 @@ mailparser.on("end", (mail_object) => { // Mail Parse End  Block
         unknownUser(mailSender);
         return;
     }
+
+    if (subject == " ") { subject = "From " + mailSenderName };         //180707 For missing mail subject
 
     console.log("日付:", mail_object.date.toLocaleString());
 
