@@ -17,7 +17,7 @@ https://github.com/nodemailer/nodemailer-wellknown#supported-services
 にあるWell-known Services のいずれかを使うこととする
 </pre>
 
-<注意>
+# 開発環境
 * iconv のインストールが必要だがWindowsの場合は事前に
     * Python 2.7
     * Visual C++
