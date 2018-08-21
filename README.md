@@ -2,14 +2,15 @@
 ## Post Contents to Static CMS  by Mail
 ## Used to be for Pulse CMS, now for Hugo
 
-実行方法はmaintask-sample.ps1参照
+# 実行方法
+* maintask-sample.ps1参照
 
-* 添付ファイルはmedia/attachedに保存される
-* ブログ本文にファイルへのリンクを表示
-
-To be done
-
+# 機能
+* INBOXの未読メールを読み込む
+   * 送信者がアドレス帳に登録されていれば掲示板の投稿を作成
+      * 添付ファイルはmedia/attachedに保存され、ブログ本文にファイルへのリンクを表示
 * 投稿メールの配信
+   * アドレス帳にあるアドレスに投稿を配信
 <pre>
 配信には自前のSMTPサーバーでなく
 https://github.com/nodemailer/nodemailer-wellknown#supported-services
